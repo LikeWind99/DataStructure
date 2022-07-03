@@ -1,98 +1,114 @@
 #include <stdio.h>
-#define MaxSize 20
+#define MAXSIZE 20
+#define OK 1
+#define ERROR 0
 typedef int ElementType;
 
-typedef struct seqList {
-	ElementType elem[MaxSize];
-	int length;	
+typedef struct SeqList {
+	ElementType elem[MAXSIZE];
+	int length;
 } SeqList;
 
-// 初始化顺序表
-int Init_SeqList(SeqList &L) {
-	// 对顺序表本身进行操作，因此需要引用
+int InitSeqList(SeqList &L) {
 	L.length = 0;
-	return 1;
+	return OK;
 }
 
-
-// 顺序表中查找元素
-int Locate_SeqList(SeqList &L, ElementType x) {
-	int i = 0;
-	while(i < L.length && L.elem[i] != x) {
-		i++;	
+int InsertSeqList(SeqList &L, int i, ElementType data) {
+	if(L.length >= MAXSIZE) {
+		printf("The sequence list is full.\n");
+		return ERROR;
 	}
-	if(i >= L.length) {
-		printf("顺序表中不存在该元素!\n");
-		return 0;
+	if(L.length < 0 || i > L.length + 1) {
+		printf("Invalid insert location.\n");
+		return ERROR;
 	}
-	// 查找的是位序，所以找到列表下标后需要+1
-	return i+1;
-}
-
-// 在第i个插入元素
-int Insert_SeqList(SeqList &L, int i, ElementType x) {
-	// 插入输入的是位序，从1开始
-	int j;
-	if(L.length >= MaxSize) {
-		printf("顺序表已满，无法再插入!\n");
-		return 0;
-	}
-
-	// 顺序表不允许存在空值
-	if(i <= 0 || i > L.length + 1) {
-		printf("插入位置不合法!\n");
-		return 0;
-	}
-
-	for(j = L.length-1; j >= i-1; j--) {
+	for(int j = L.length-1; j >= i-1; j--) {
 		L.elem[j+1] = L.elem[j];
 	}
-
-	L.elem[i-1] = x;
+	L.elem[i-1] = data;
 	L.length += 1;
-	return 1;
+	return OK;
 }
 
-// 删除第i个元素
-int Delete_SeqList(SeqList &L, int i) {
-	// 删除输入的是位序，从1开始
-	int j;
-	// 如果删除的位置小于1或者大于顺序表的长度，则说明输入不合法
+int ModifySeqList(SeqList &L, int i, ElementType data, ElementType &value) {
 	if(i < 1 || i > L.length) {
-		printf("删除位置不正确!\n");
-		return 0;
+		printf("Invalid modification location.\n");
+		return ERROR;
 	}
-	for(j = i; j < L.length; j++) {
+	ElementType tmp = L.elem[i-1];
+	L.elem[i-1] = data;
+	value = tmp;
+	return OK;
+}
+
+int DeleteSeqList(SeqList &L, int i) {
+	if(i < 1 || i > L.length) {
+		printf("Invalid delete location.\n");
+		return ERROR;
+	}
+	for(int j = i; j < L.length; j++) {
 		L.elem[j-1] = L.elem[j];
 	}
 	L.length -= 1;
-	return 1;
+	return OK;
 }
 
-// 打印顺序表
-void Display_SeqList(SeqList L) {
-	int i;
-	for(i = 0; i < L.length; i++) {
-		printf("%d\n", L.elem[i]);
+int LocateSeqList(SeqList &L, ElementType x) {
+	int i = 0;
+	while(i < L.length && L.elem[i] != x) {
+		i++;
 	}
+	if(i >= L.length) {
+		printf("Not find element in sequence list\n");
+		return ERROR;
+	}
+	return (i+1);
+}
+
+void DisplaySeqList(SeqList L) {
+	for(int i = 0; i < L.length; i++) {
+		printf("%d ", L.elem[i]);
+	}
+	printf("\n");
 }
 
 int main() {
-	SeqList L;
-	int i;
-	i = 1;
-	Init_SeqList(L);
-	printf("初始化, 建立顺序表如下：\n");
-	Insert_SeqList(L, 1, 1);
-	Insert_SeqList(L, 2, 2);
-	Insert_SeqList(L, 3, 3);
-	Insert_SeqList(L, 4, 4);
-	Insert_SeqList(L, 5, 5);
-	printf("原始的顺序表是:\n");
-	Display_SeqList(L);
-	printf("现在进行删除操作:\n");
-	Delete_SeqList(L, 2);
-	printf("删除2之后的顺序表是:\n");
-	Display_SeqList(L);
+	SeqList seqList;
+	InitSeqList(seqList);
+	for(int i = 0; i < MAXSIZE / 2; i++) {
+		InsertSeqList(seqList, 1, MAXSIZE-i);
+	}
+	printf("Original sequence list is:\n");
+	DisplaySeqList(seqList);
+	printf("\n");
+	printf("Test delete function: ");
+	printf("Try to delete 0th element\n");
+	DeleteSeqList(seqList, 0);
+	printf("Try to delete 5th element\n");
+	DeleteSeqList(seqList, 5);
+	printf("After delete 5th element: ");
+	DisplaySeqList(seqList);
+	printf("\n");
+	printf("Test insert function: ");
+	printf("Try to insert 7th element\n");
+	InsertSeqList(seqList, 7, 520);
+	printf("After insert 7th element: ");
+	DisplaySeqList(seqList);
+	printf("Try to insert 13th element\n");
+	InsertSeqList(seqList, 13, 520);
+	DisplaySeqList(seqList);
+	printf("\n");
+	printf("Test modify function: ");
+	printf("Try to modify 8th element\n");
+    ElementType data;
+	ModifySeqList(seqList, 8, 521, data);
+	printf("The original data of 8th is: %d\n", data);
+	DisplaySeqList(seqList);
+	printf("\n");
+	printf("Test search function: ");
+	int returnCode = LocateSeqList(seqList, 520);
+	DisplaySeqList(seqList);
+	printf("%d is the %dth element\n", 520, returnCode);
 	return 0;
 }
